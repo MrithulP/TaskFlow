@@ -64,4 +64,4 @@ Tasks are stored in `localStorage` under the key `tf_tasks`. To reset everything
 localStorage.removeItem('tf_tasks')
 ```
 
-<img src="taskflow_logo_v2.svg" alt="Taskflow — Task Manager" style="max-width:380px; width:100%;">
+<img src="src/taskflow_logo_v2.svg" alt="Taskflow — Task Manager" style="max-width:380px; width:100%;">
