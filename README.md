@@ -1,5 +1,3 @@
-<img src="logo.svg" alt="Taskflow — Task Manager" style="max-width:380px; width:100%;">
-
 # Taskflow — Task Manager
 
 A clean, dark-themed task manager that works in any browser. No frameworks, no dependencies — just HTML, CSS, and vanilla JS.
