@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taskflow — Task Manager</title>
+
+  <!-- PWA manifest (scoped to /taskflow/) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f0f11">
+
+  <!-- Favicon — SVG from src/ subfolder -->
+  <link rel="icon" type="image/svg+xml" href="src/icon.svg">
+  <!-- Fallback PNG for older browsers / iOS -->
+  <link rel="apple-touch-icon" href="src/icon-192.png">
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="app-wrapper">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <!-- Logo from src/ subfolder -->
+        <img src="src/icon.svg" alt="Taskflow" class="brand-logo" width="30" height="30">
+        <span class="brand-name">Taskflow</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-filter="all">
+          <i class="fas fa-grip-lines"></i><span>All Tasks</span>
+        </button>
+        <button class="nav-item" data-filter="pending">
+          <i class="fas fa-circle-dot"></i><span>Pending</span>
+        </button>
+        <button class="nav-item" data-filter="in-progress">
+          <i class="fas fa-spinner"></i><span>In Progress</span>
+        </button>
+        <button class="nav-item" data-filter="completed">
+          <i class="fas fa-circle-check"></i><span>Completed</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-stats">
+        <p class="stats-heading">Overview</p>
+        <div class="stat-row">
+          <div class="stat-block pending-block">
+            <span class="stat-number" id="pending-count">0</span>
+            <span class="stat-label">Pending</span>
+          </div>
+          <div class="stat-block progress-block">
+            <span class="stat-number" id="in-progress-count">0</span>
+            <span class="stat-label">In Progress</span>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-block today-block">
+            <span class="stat-number" id="due-today-count">0</span>
+            <span class="stat-label">Due Today</span>
+          </div>
+          <div class="stat-block done-block">
+            <span class="stat-number" id="completed-count">0</span>
+            <span class="stat-label">Completed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <button id="clear-completed-sidebar" class="btn-clear-completed">
+        <i class="fas fa-broom"></i> Clear Completed
+      </button>
+    </aside>
+
+    <!-- ========== MAIN ========== -->
+    <main class="main-content">
+
+      <!-- Desktop topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title" id="page-title-display">All Tasks</h1>
+          <span class="task-badge" id="total-task-count">0 tasks</span>
+        </div>
+        <div class="topbar-right">
+          <div class="search-box">
+            <i class="fas fa-magnifying-glass"></i>
+            <input type="text" id="search-input" placeholder="Search tasks…">
+          </div>
+          <select id="sort-tasks" class="sort-select">
+            <option value="" disabled selected>Sort by…</option>
+            <option value="due-date">Due Date</option>
+            <option value="importance">Importance</option>
+            <option value="difficulty">Difficulty</option>
+            <option value="name">Name (A–Z)</option>
+          </select>
+          <button id="clear-completed-topbar" class="btn-clear-completed btn-clear-topbar">
+            <i class="fas fa-broom"></i> Clear Completed
+          </button>
+          <button id="add-task-btn" class="btn-primary">
+            <i class="fas fa-plus"></i> New Task
+          </button>
+        </div>
+      </header>
+
+      <!-- Mobile topbar -->
+      <div class="mobile-topbar">
+        <div class="search-box">
+          <i class="fas fa-magnifying-glass"></i>
+          <input type="text" id="search-input-mobile" placeholder="Search tasks…">
+        </div>
+        <button id="add-task-btn-mobile" class="btn-primary btn-icon">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- Mobile stats bar -->
+      <div class="mobile-stats-bar">
+        <div class="mobile-stat-chip active-filter" data-filter="all">
+          <span class="mobile-stat-number" id="mob-all-count">0</span>
+          <span class="mobile-stat-label">All</span>
+        </div>
+        <div class="mobile-stat-chip" data-filter="pending">
+          <span class="mobile-stat-number pending-num" id="mob-pending-count">0</span>
+          <span class="mobile-stat-label">Pending</span>
+        </div>
+        <div class="mobile-stat-chip" data-filter="in-progress">
+          <span class="mobile-stat-number progress-num" id="mob-progress-count">0</span>
+          <span class="mobile-stat-label">In Progress</span>
+        </div>
+        <div class="mobile-stat-chip" data-filter="completed">
+          <span class="mobile-stat-number done-num" id="mob-done-count">0</span>
+          <span class="mobile-stat-label">Completed</span>
+        </div>
+        <div class="mobile-stat-chip" data-filter="due-today">
+          <span class="mobile-stat-number today-num" id="due-today-count-mob">0</span>
+          <span class="mobile-stat-label">Due Today</span>
+        </div>
+      </div>
+
+      <!-- Mobile filter + sort row -->
+      <div class="mobile-filter-row">
+        <button class="mobile-filter-chip-pill active" data-filter="all"><i class="fas fa-grip-lines"></i> All</button>
+        <button class="mobile-filter-chip-pill" data-filter="pending"><i class="fas fa-circle-dot"></i> Pending</button>
+        <button class="mobile-filter-chip-pill" data-filter="in-progress"><i class="fas fa-spinner"></i> Active</button>
+        <button class="mobile-filter-chip-pill" data-filter="completed"><i class="fas fa-circle-check"></i> Done</button>
+        <select class="mobile-sort-select" id="sort-tasks-mobile">
+          <option value="" disabled selected>Sort…</option>
+          <option value="due-date">Due Date</option>
+          <option value="importance">Importance</option>
+          <option value="difficulty">Difficulty</option>
+          <option value="name">Name (A–Z)</option>
+        </select>
+        <button id="clear-completed-mobile" class="mobile-clear-btn">
+          <i class="fas fa-broom"></i> Clear Done
+        </button>
+      </div>
+
+      <!-- Task Grid -->
+      <div id="task-list" class="task-grid"></div>
+
+      <!-- Empty state -->
+      <div id="empty-state" class="empty-state hidden">
+        <div class="empty-illustration">✦</div>
+        <h3>Nothing here yet</h3>
+        <p>Create a task to get started on your goals.</p>
+        <button class="btn-primary" id="empty-add-btn">
+          <i class="fas fa-plus"></i> New Task
+        </button>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========== TASK MODAL ========== -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">New Task</h2>
+        <button id="modal-close" class="modal-close"><i class="fas fa-xmark"></i></button>
+      </div>
+      <form id="task-input-form" novalidate>
+        <input type="hidden" id="edit-task-id">
+        <div class="form-group">
+          <label for="task-name">Task Name</label>
+          <input type="text" id="task-name" placeholder="What needs to be done?" required>
+        </div>
+        <div class="form-group">
+          <label for="task-details">Details</label>
+          <textarea id="task-details" placeholder="Add more context or notes…" rows="3"></textarea>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="task-due-date">Due Date</label>
+            <input type="date" id="task-due-date" required>
+          </div>
+          <div class="form-group">
+            <label for="task-status">Status</label>
+            <select id="task-status">
+              <option value="pending">Pending</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Importance</label>
+          <div class="pill-group" id="importance-pills">
+            <button type="button" class="pill" data-value="high">High</button>
+            <button type="button" class="pill" data-value="medium">Medium</button>
+            <button type="button" class="pill" data-value="low">Low</button>
+          </div>
+          <input type="hidden" id="task-importance">
+        </div>
+        <div class="form-group">
+          <label>Difficulty</label>
+          <div class="pill-group" id="difficulty-pills">
+            <button type="button" class="pill" data-value="hard">Hard</button>
+            <button type="button" class="pill" data-value="medium">Medium</button>
+            <button type="button" class="pill" data-value="easy">Easy</button>
+          </div>
+          <input type="hidden" id="task-difficulty">
+        </div>
+        <div class="form-actions">
+          <button type="button" id="cancel-btn" class="btn-ghost">Cancel</button>
+          <button type="submit" class="btn-primary" id="submit-btn">Add Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== DELETE CONFIRM MODAL ========== -->
+  <div id="confirm-overlay" class="modal-overlay hidden">
+    <div class="modal confirm-modal">
+      <div class="confirm-icon"><i class="fas fa-triangle-exclamation"></i></div>
+      <h3>Delete this task?</h3>
+      <p>This action can't be undone.</p>
+      <div class="form-actions">
+        <button id="confirm-cancel" class="btn-ghost">Keep it</button>
+        <button id="confirm-delete" class="btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== CLEAR COMPLETED CONFIRM MODAL ========== -->
+  <div id="clear-confirm-overlay" class="modal-overlay hidden">
+    <div class="modal confirm-modal">
+      <div class="confirm-icon confirm-icon-broom"><i class="fas fa-broom"></i></div>
+      <h3>Clear all completed tasks?</h3>
+      <p id="clear-confirm-count">This will remove all completed tasks permanently.</p>
+      <div class="form-actions">
+        <button id="clear-confirm-cancel" class="btn-ghost">Cancel</button>
+        <button id="clear-confirm-ok" class="btn-danger">Clear All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- ========== MOBILE BOTTOM NAV ========== -->
+  <nav class="mobile-bottom-nav">
+    <button class="bottom-nav-item active" data-filter="all">
+      <i class="fas fa-grip-lines"></i><span>All</span>
+    </button>
+    <button class="bottom-nav-item" data-filter="pending">
+      <i class="fas fa-circle-dot"></i><span>Pending</span>
+    </button>
+    <button class="bottom-nav-add btn-primary" id="add-task-btn-bnav">
+      <i class="fas fa-plus"></i><span>New</span>
+    </button>
+    <button class="bottom-nav-item" data-filter="in-progress">
+      <i class="fas fa-spinner"></i><span>Active</span>
+    </button>
+    <button class="bottom-nav-item" data-filter="completed">
+      <i class="fas fa-circle-check"></i><span>Done</span>
+    </button>
+  </nav>
+
+  <script src="script.js"></script>
+
+  <!-- ========== SERVICE WORKER REGISTRATION ========== -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('./serviceworker.js', { scope: './' })
+          .then(reg => console.log('[Taskflow] SW registered, scope:', reg.scope))
+          .catch(err => console.warn('[Taskflow] SW registration failed:', err));
+      });
+    }
+  </script>
+
+</body>
+</html>
